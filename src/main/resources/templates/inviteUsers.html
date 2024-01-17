@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+    <meta charset="ISO-8859-1">
+    <title>Restaurants Session Invite </title>
+
+    <link rel="stylesheet"
+          href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+          crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+</head>
+<body>
+<!-- create navigation bar ( header) -->
+<nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed"
+                    data-toggle="collapse" data-target="#navbar" aria-expanded="false"
+                    aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span> <span
+                    class="icon-bar"></span> <span class="icon-bar"></span> <span
+                    class="icon-bar"></span>
+            </button>
+            <!--<a class="navbar-brand" href="#" th:href="@{/}">Registration and
+                Login Module</a>-->
+            <a class="navbar-brand" href="#" th:href="@{/}">Lunch Invite Module</a>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+            <ul class="nav navbar-nav">
+                <li sec:authorize="isAuthenticated()"><a th:href="@{/logout}">Logout</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<br>
+<br>
+<div class = "container">
+    <div class = "row">
+        <div class = "col-md-6 col-md-offset-3">
+
+            <h1> User Session Invite </h1>
+            <form>
+               <!-- logout message -->
+                <div th:if="${param.logout}">
+                    <div class="alert alert-info">You have been logged out.</div>
+                </div>
+
+                <div class = "form-group">
+                    <label> Session Name </label> :
+                    <select class="form-control" id="sessionId" onchange="updateTable()">
+                        <option value="0">select option</option>
+                        <option th:each="lsession : ${listAllSession}" th:value="${lsession.id}" th:text="${lsession.sessionName}"></option>
+                    </select>
+                </div>
+
+                <h1> User Invitation </h1>
+                <table class="table is-fullwidth" id = "userTable">
+                    <thead>
+                    <tr>
+                        <th> User Name </th>
+                        <th> Invite User </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+
+                    <tr th:each="user : ${inviteUsersList}">
+                        <td><span th:text="${user.email}"> </span></td>
+                        <td>
+                            <span th:if="${user.invited == 'No'}">
+                                <form action="#" th:action="@{/inviteUser/} + ${{user.id}}" method="get">
+                                    <button th:id="'table_entry_childs_button_' + ${user.id}" type="submit">
+                                        <i>Invite User</i>
+                                    </button>
+                                </form>
+                            </span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <script th:inline="javascript">
+                    function updateTable(sessionIdTemp) {
+                        var sessionId = $("#sessionId").val();
+                        if(sessionId != 0) {
+                            sessionIdTemp = sessionId
+                        }
+                        var url = "/getUsersBySession?sessionId=" + sessionIdTemp;
+
+                        $.get(url, function (data) {
+                            updateTableBody(data);
+                        });
+                    }
+
+                    function updateTableBody(users) {
+                        var sessionId = $("#sessionId").val();
+                        var tableBody = $("#userTable tbody");
+                        tableBody.empty();
+                        var button = "";
+                        users.forEach(function (user) {
+
+                            var sessionEnded= "No";
+                            var sessionEndMap = /*[[${sessionEndMap}]]*/ {};
+
+                            // Iterate over the map using jQuery
+                            $.each(sessionEndMap, function(key, value) {
+                                if (sessionId === key) {
+                                    sessionEnded = value;
+                                }
+                            });
+
+                            if (user.invited === 'No' && sessionEnded === 'No') {
+                                // Create a new button for each user
+                                button = $('<button>')
+                                    .attr('id', 'table_entry_childs_button_' + user.userId)
+                                    .addClass('invite-button') // Optionally, add a class for styling
+                                    .text('Invite User')
+                                    .click(function () {
+                                        inviteUser(user.userId, sessionId);
+                                    });
+                                // Append the button to a new row in the table's tbody
+                                var newRow = $('<tr>')
+                                    .append($('<td>').text(user.email))
+                                    .append($('<td>').append(button));
+                                tableBody.append(newRow);
+                            } else {
+                                var setActionStr="";
+                                if (user.invited === 'Yes' && sessionEnded === 'Yes') {
+                                    // Append the button to a new row in the table's tbody
+                                    setActionStr = "Invited & Session Ended";
+                                } else if(sessionEnded === 'Yes') {
+                                    setActionStr = "Session Ended";
+                                } else if(user.invited === 'Yes') {
+                                    setActionStr = "Invited";
+                                }
+                                // Append the button to a new row in the table's tbody
+                                var newRow = $('<tr>')
+                                    .append($('<td>').text(user.email))
+                                    .append($('<td>').text(setActionStr));
+                                tableBody.append(newRow);
+
+                            }
+                        });
+                    }
+                    function inviteUser(userId, sessionId) {
+                        // Make an AJAX request to invite the user
+                        var url = '/saveinviteUser/' + userId + '/' + $("#sessionId").val();
+                        $.get(url, function(data) {
+                            // Handle the response if needed
+                            console.log('Invitation sent for user with ID ' + userId);
+                            // Update the UI accordingly
+                            $('#table_entry_childs_button_' + userId)
+                                .text('Invitation Sent')
+                                .prop('disabled', true)
+                                .removeClass('invite-button') // Remove class to prevent further clicks
+                                .addClass('invited-button'); // Optionally, add a different class for styling
+                            localStorage.setItem("sessionId", sessionId);
+                        });
+                    }
+                    $(document).ready(function() {
+                        var sessionIdLocal = localStorage.getItem("sessionId");
+                        if(sessionIdLocal != null && sessionIdLocal != 0) {
+                            document.getElementById("sessionId").value=sessionIdLocal;
+                            updateTable(sessionIdLocal);
+                        }
+                        localStorage.clear();
+                    });
+                </script>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>
