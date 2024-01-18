@@ -23,4 +23,7 @@ public interface UserSessionInviteRepository extends JpaRepository<UserSessionIn
     @Modifying
     @Query(value = "update users.user_session_invite set restaurant_id = ?2 WHERE id = ?1", nativeQuery = true)
     void updateRestaurant(Long userSessionInviteId, Long restaurantId);
+    @Modifying
+    @Query(value = "update users.user_session_invite set restaurant_id = ?2 WHERE session_id = ?1 and restaurant_id is null", nativeQuery = true)
+    void randomRestaurantSelection(Long sessionId, Long restaurantId);
 }

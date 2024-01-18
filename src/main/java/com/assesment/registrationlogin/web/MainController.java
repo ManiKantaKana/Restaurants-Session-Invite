@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 @Controller
@@ -66,6 +67,8 @@ public class MainController {
     {
         lunchSessionService.endSession(Long.parseLong(id));
         setLunchSessionListModel(model);
+        //Random pick the restaurant for not selected users in the session
+        userSessionInviteService.randomRestaurantSelection(Long.parseLong(id));
         return "lunchSession";
     }
 

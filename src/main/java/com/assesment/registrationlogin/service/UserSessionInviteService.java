@@ -18,4 +18,6 @@ public interface UserSessionInviteService {
     void acceptInvitation(Long userSessionInviteId);
 
     void updateRestaurant(Long userSessionInviteId, Long restaurantId);
+
+    void randomRestaurantSelection(Long sessionId);
 }

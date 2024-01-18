@@ -6,6 +6,7 @@ import com.assesment.registrationlogin.model.UserSessionInvite;
 import com.assesment.registrationlogin.repository.LunchSessionRepository;
 import com.assesment.registrationlogin.repository.UserSessionInviteRepository;
 import com.assesment.registrationlogin.web.dto.LunchSessionDto;
+import com.assesment.registrationlogin.web.dto.RestaurantDto;
 import com.assesment.registrationlogin.web.dto.UserDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 @Service("userSessionInviteService")
@@ -25,9 +28,12 @@ public class UserSessionInviteServiceImpl implements UserSessionInviteService {
 
     private LunchSessionService lunchSessionService;
 
-    public UserSessionInviteServiceImpl(UserService userService, LunchSessionService lunchSessionService) {
+    private RestaurantService restaurantService;
+
+    public UserSessionInviteServiceImpl(UserService userService, LunchSessionService lunchSessionService, RestaurantService restaurantService) {
         this.userService = userService;
         this.lunchSessionService = lunchSessionService;
+        this.restaurantService = restaurantService;
     }
 
     @Override
@@ -82,5 +88,22 @@ public class UserSessionInviteServiceImpl implements UserSessionInviteService {
     @Override
     public void updateRestaurant(Long userSessionInviteId, Long restaurantId) {
         userSessionInviteRepository.updateRestaurant(userSessionInviteId, restaurantId);
+    }
+
+    @Override
+    public void randomRestaurantSelection(Long sessionId) {
+        List<UserSessionInvite> userSessionInviteList = userSessionInviteRepository.findAllBySessionId(sessionId);
+        List<Long> selectedrestaurantList = userSessionInviteList.stream().filter(usi -> usi.getRestaurant() != null).map(usi -> usi.getRestaurant().getId()).collect(Collectors.toList());
+        List<RestaurantDto> restaurantDtoList = restaurantService.listAllRestaurants();
+        Long restaurantId = null;
+        Random r = new Random();
+        if(selectedrestaurantList != null && selectedrestaurantList.size() > 0) {
+            restaurantId = selectedrestaurantList.get(r.nextInt(selectedrestaurantList.size()));
+        } else if(restaurantDtoList != null && restaurantDtoList.size() >0) {
+            restaurantId = restaurantDtoList.get(r.nextInt(restaurantDtoList.size())).getId();
+        }
+        if(restaurantId != null) {
+            userSessionInviteRepository.randomRestaurantSelection(sessionId, restaurantId);
+        }
     }
 }
