@@ -33,7 +33,7 @@ Please find 3 Modules (Create Lunch Session, Invite Users, Invitation Accept and
 - First create a Sessions from Create Lunch Session module
   ![image](https://github.com/ManiKantaKana/Restaurants-Session-Invite/assets/64183524/19e4464e-0535-4f82-98c1-6c1adfd5ea3e)
 
-After session saved, we can see the Action button to End session
+After session saved, we can see the Action button to End session. Only creater of the session will end the Session.
 After click the End session buttion page will auto refresh and Session Ended cloumn showing "Yes"
 
 Below screen is to invite the Users to the Session
@@ -44,7 +44,7 @@ After invite we can see Invited
 
 Now Logout and login into invited user account
 Go to Invitation Accept and Restaurant Selection module
-- Accept the Invitation
+- Accept the Invitation. Only invited user only can accept the invitation.
   ![image](https://github.com/ManiKantaKana/Restaurants-Session-Invite/assets/64183524/e0bfd72d-b90b-4578-90cb-d9a8f5108c50)
 
   ![image](https://github.com/ManiKantaKana/Restaurants-Session-Invite/assets/64183524/d5288791-3e81-41e2-84f3-2d443f63b419)
@@ -55,6 +55,13 @@ Go to Invitation Accept and Restaurant Selection module
   Below is the final screen
   ![image](https://github.com/ManiKantaKana/Restaurants-Session-Invite/assets/64183524/49bc6796-981e-436c-af80-21be43998dfb)
 
+Note: I have scaled this project by adding the below validation
+- Only Creater of the lunch session will end the session.
+- At the end of session restaurant will will randomly.
+- Only Invited user can accept the invitation and the user can able to see the other user selected restaurant.
+  
+We can improve this module by adding the IAM (Identity Access Management) roles to the login user and allow the module access based on the
+login user role.
 
 
 
